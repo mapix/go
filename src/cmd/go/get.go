@@ -380,6 +380,11 @@ func downloadPackage(p *Package) error {
 		return fmt.Errorf("cannot download, %v uses insecure protocol", repo)
 	}
 
+	if getMirrorProjects()[repo] != "" {
+		mirrorPrintf("mirror repo from %v to %v", repo, mirrorProjects[repo])
+		repo = mirrorProjects[repo]
+	}
+
 	if p.build.SrcRoot == "" {
 		// Package not found.  Put in first directory of $GOPATH.
 		list := filepath.SplitList(buildContext.GOPATH)
