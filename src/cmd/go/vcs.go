@@ -540,6 +540,7 @@ type repoRoot struct {
 	// root is the import path corresponding to the root of the
 	// repository
 	root string
+	tag  string
 }
 
 var httpPrefixRE = regexp.MustCompile(`^https?:`)
@@ -664,6 +665,7 @@ func repoRootFromVCSPaths(importPath, scheme string, security securityMode, vcsP
 			vcs:  vcs,
 			repo: match["repo"],
 			root: match["root"],
+			tag:  match["tag"],
 		}
 		return rr, nil
 	}
