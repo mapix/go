@@ -265,9 +265,9 @@ func download(arg string, stk *importStack, getTestDeps bool) {
 // to make the first copy of or update a copy of the given package.
 func downloadPackage(p *Package) error {
 	var (
-		vcs            *vcsCmd
-		repo, rootPath string
-		err            error
+		vcs                 *vcsCmd
+		tag, repo, rootPath string
+		err                 error
 	)
 	if p.build.SrcRoot != "" {
 		// Directory exists.  Look for checkout along path to src.
@@ -302,7 +302,7 @@ func downloadPackage(p *Package) error {
 		if err != nil {
 			return err
 		}
-		vcs, repo, rootPath = rr.vcs, rr.repo, rr.root
+		vcs, repo, rootPath, tag = rr.vcs, rr.repo, rr.root, rr.tag
 	}
 
 	if getMirrorProjects()[repo] != "" {
@@ -337,6 +337,7 @@ func downloadPackage(p *Package) error {
 	// Check that this is an appropriate place for the repo to be checked out.
 	// The target directory must either not exist or have a repo checked out already.
 	meta := filepath.Join(root, "."+vcs.cmd)
+
 	st, err := os.Stat(meta)
 	if err == nil && !st.IsDir() {
 		return fmt.Errorf("%s exists but is not a directory", meta)
@@ -380,8 +381,15 @@ func downloadPackage(p *Package) error {
 	if i := strings.Index(vers, " "); i >= 0 {
 		vers = vers[:i]
 	}
-	if err := vcs.tagSync(root, selectTag(vers, tags)); err != nil {
-		return err
+
+	if tag != "" {
+		if err := vcs.tagSync(root, tag); err != nil {
+			return err
+		}
+	} else {
+		if err := vcs.tagSync(root, selectTag(vers, tags)); err != nil {
+			return err
+		}
 	}
 
 	return nil
